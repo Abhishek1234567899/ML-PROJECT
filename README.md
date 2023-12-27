@@ -19,3 +19,11 @@ git pull
 ```
 bash your_file_name
 ```
+
+```
+python setup.py install
+```
+```
+# another way
+pip install -r requirements.txt
+```
