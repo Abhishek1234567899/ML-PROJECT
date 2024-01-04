@@ -1,26 +1,57 @@
+
+import pandas as pd
+import numpy as np
+from src.DimondPricePrediction.logger import logging
+from src.DimondPricePrediction.exception import customexception
+
+import os
 import sys
+from sklearn.model_selection import train_test_split
+from dataclasses import dataclass
+from pathlib import Path
+
+class DataIngestionConfig:
+    raw_data_path:str=os.path.join("artifacts","raw.csv")
+    train_data_path:str=os.path.join("artifacts","train.csv")
+    test_data_path:str=os.path.join("artifacts","test.csv")
 
 
-class customexception(Exception):
-    def __init__(self,error_message,error_details:sys):
-        self.error_message = error_message
-        _,_,exc_tb = error_details.exc_info()
-        
-        self.lineno=exc_tb.tb_lineno
-        self.file_name=exc_tb.tb_frame.f_code.co_filename 
-    
-    def __str__(self):
-        return "Error occured in python script name [{0}] line number [{1}] error message [{2}]".format(
-        self.file_name, self.lineno, str(self.error_message))
-        
+class DataIngestion:
+    def __init__(self):
+        self.ingestion_config=DataIngestionConfig()
         
     
-
-if __name__ == "__main__":
-    try:
+    def initiate_data_ingestion(self):
+        logging.info("data ingestion started")
         
-        a=1/0
+        try:
+            data=pd.read_csv(Path(os.path.join("notebooks/data","gemstone.csv")))
+            logging.info(" i have read dataset as a df")
+            
+            
+            os.makedirs(os.path.dirname(os.path.join(self.ingestion_config.raw_data_path)),exist_ok=True)
+            data.to_csv(self.ingestion_config.raw_data_path,index=False)
+            logging.info(" i have saved the raw dataset in artifact folder")
+            
+            logging.info("here i have performed train test split")
+            
+            train_data,test_data=train_test_split(data,test_size=0.25)
+            logging.info("train test split completed")
+            
+            train_data.to_csv(self.ingestion_config.train_data_path,index=False)
+            test_data.to_csv(self.ingestion_config.test_data_path,index=False)
+            
+            logging.info("data ingestion part completed")
+            
+            return (
+                 
+                
+                self.ingestion_config.train_data_path,
+                self.ingestion_config.test_data_path
+            )
+            
+            
+        except Exception as e:
+           logging.info("exception during occured at data ingestion stage")
+           raise customexception(e,sys)
     
-    except Exception as e:
-        raise customexception(e,sys)
-        
